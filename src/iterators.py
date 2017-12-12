@@ -2,13 +2,15 @@ import json
 import os
 import random
 import time
-from Queue import Queue
+from queue import Queue
 from math import ceil
-from thread import start_new_thread
+# import thread
+# import start_new_thread
+from threading import Thread
 
 import numpy as np
 
-from utilities import prepared_dataset_image, patch_centered_at, image_size, list_all_files, index_at_pixel, \
+from src.utilities import prepared_dataset_image, patch_centered_at, image_size, list_all_files, index_at_pixel, \
     pixel_at_index, TT, load_csv, random_rotation
 
 
@@ -65,7 +67,9 @@ class BatchGenerator(object):
                 data_y, pool_y = append(data_y, pool_y, None)
                 data.put([data_x, data_y])
 
-        start_new_thread(produce, ())
+        # start_new_thread(produce, ())
+        Thread(target=produce, args=()).start()
+
         i = 1
         while i <= self.n:
             start = time.clock()
@@ -107,12 +111,15 @@ class Dataset(object):
     @property
     def image_size(self):
         if not hasattr(self, '_image_size'):
+
+            print("self.root_path",self.root_path)
+            print("self.files",self.files)
             self._image_size = image_size(prepared_dataset_image(os.path.join(self.root_path, self.files[0][0])))
         return self._image_size
 
     @property
     def dataset_store_path(self):
-        return os.path.join(self.root_path, self.name+'.dataset.json')
+        return os.path.join(self.root_path, self.name + '.dataset.json')
 
     @property
     def data(self):
@@ -191,7 +198,7 @@ class Dataset(object):
         n = int(n * self.ratio)
         TT.debug("Collecting", n, "random samples.")
         pixels_per_image = int(np.prod(self.image_size))
-        indices = xrange(len(self.files) * pixels_per_image)
+        indices = range(len(self.files) * pixels_per_image)
         ignored = 0
         for index in random.sample(indices, n):
             data_file, label_file = self.files[index / pixels_per_image]
@@ -234,7 +241,7 @@ class DatasetIterator(object):
 
     def generator(self):
         files = self.dataset.keys()
-        random.shuffle(files)
+        random.shuffle(list(files))
         for filename in files:
             image = prepared_dataset_image(os.path.join(self.root_path, filename), border=self.patch_size)
             random.shuffle(self.dataset[filename])
@@ -261,6 +268,6 @@ class ImageIterator(object):
         return int(np.prod(self.image_size))
 
     def __iter__(self):
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             col, row = pixel_at_index(i, self.image_size)
             yield patch_centered_at(self.input, row=row, col=col, size=self.patch_size), self.output[row, col]

@@ -1,6 +1,6 @@
 import re
 
-from utilities import TT
+from src.utilities import TT
 
 
 def icpr2012():

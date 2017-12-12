@@ -6,17 +6,18 @@ import time
 import numpy
 from keras.callbacks import Callback
 
-from utilities import TT
-
+from src.utilities import TT
 
 class LearnLog(Callback):
     """
     Record loss history.
     """
+
     def __init__(self, name, path):
+        print("LearnLog", path)
         super(LearnLog, self).__init__()
-        self.log_file = os.path.join(path, name+'.txt')
-        self.weights_file = os.path.join(path, name+'.%d.weights.npy')
+        self.log_file = os.path.join(path, name + '.txt')
+        self.weights_file = os.path.join(path, name + '.%d.weights.npy')
         self.last_loss = numpy.inf
         self.old_epochs = 0
         with open(self.log_file) as fd:
@@ -42,7 +43,10 @@ class LearnLog(Callback):
         self.start = time.time()
 
     def on_dataset_epoch_end(self, epoch, logs={}):
-        numpy.savetxt(open(self.log_file, 'a'), [[self.old_epochs + self.epoch, self.loss]], fmt="%g")
+        print("self.log_file ",self.old_epochs)
+        print("self.log_file ",self.epoch)
+        print("self.log_file ",self.loss)
+        numpy.savetxt(self.log_file, [[self.old_epochs + self.epoch, self.loss]], fmt="%g")
         if self.last_loss > self.loss:
             filename = self.weights_file % (self.old_epochs + epoch)
             TT.debug("Saving weights to", filename)

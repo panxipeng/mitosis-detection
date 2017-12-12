@@ -137,6 +137,8 @@ def img2np(img):
 
 
 def load_csv(path):
+
+    # print("load CSV ", path)
     assert re.compile(r'.*\.csv').match(path) is not None
     result = []
     csv_type = None
@@ -148,17 +150,18 @@ def load_csv(path):
             continue
         # Parse line into list of numbers.
         points = map(lambda x: x, line.strip().split(','))
+
         # Detect format of csv. csv_type ∈ {1, 2}
         #   1: Format (col, row, p)
         #   2: Format (col, row), (col, row) ...
         if csv_type is None:
-            csv_type = len(points) % 2
+            csv_type = len(list(points)) % 2
         # Check data is correct.
-        assert len(points) % 2 == csv_type
+        assert len(list(points)) % 2 == csv_type
         if csv_type == 0:
             # Convert (col, row, 1.0)
-            result += [[int(points[i]), int(points[i + 1]), 1.0] for i in xrange(0, len(points), 2)]
-        elif len(points) == 3:
+            result += [[int(points[i]), int(points[i + 1]), 1.0] for i in range(0, len(list(points)), 2)]
+        elif len(list(points)) == 3:
             # Convert (col, row, 1.0)
             result.append([int(points[0]), int(points[1]), float(points[2])])
         else:
@@ -192,32 +195,32 @@ class TT:
     @staticmethod
     def debug(*args):
         if TT.verbose:
-            print TT.SUCCESS + '> ' + ' '.join(map(str, args)) + TT.END
+            print(TT.SUCCESS + '> ' + ' '.join(map(str, args)) + TT.END)
 
     @staticmethod
     def info(*args):
-        print TT.INFO + '> ' + ' '.join(map(str, args)) + TT.END
+        print(TT.INFO + '> ' + ' '.join(map(str, args)) + TT.END)
 
     @staticmethod
     def success(*args):
-        print TT.SUCCESS + '> ' + ' '.join(map(str, args)) + TT.END
+        print(TT.SUCCESS + '> ' + ' '.join(map(str, args)) + TT.END)
 
     @staticmethod
     def danger(*args):
-        print TT.DANGER + '> ' + ' '.join(map(str, args)) + TT.END
+        print(TT.DANGER + '> ' + ' '.join(map(str, args)) + TT.END)
 
     @staticmethod
     def warn(*args):
-        print TT.WARNING + '> ' + ' '.join(map(str, args)) + TT.END
+        print(TT.WARNING + '> ' + ' '.join(map(str, args)) + TT.END)
 
     @staticmethod
     def imp(*args):
-        print TT.HEADER + ' '.join(map(str, args)) + TT.END
+        print(TT.HEADER + ' '.join(map(str, args)) + TT.END)
 
     @staticmethod
     def ul(*args):
-        print TT.UNDERLINE + ' '.join(map(str, args)) + TT.END
+        print(TT.UNDERLINE + ' '.join(map(str, args)) + TT.END)
 
     @staticmethod
     def b(*args):
-        print TT.BOLD + ' '.join(map(str, args)) + TT.END
+        print(TT.BOLD + ' '.join(map(str, args)) + TT.END)

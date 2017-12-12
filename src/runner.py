@@ -4,9 +4,9 @@ import time
 
 import numpy
 
-from callbacks import LearnLog
-from iterators import Dataset, BatchGenerator, ImageIterator
-from utilities import TT, np_append, change_ext
+from src.callbacks import LearnLog
+from src.iterators import Dataset, BatchGenerator, ImageIterator
+from src.utilities import TT, np_append, change_ext
 
 
 def task_train_filter(args):
@@ -14,7 +14,7 @@ def task_train_filter(args):
     dataset = Dataset(root_path=args.path, verbose=args.verbose, name='base-model',
                       mapper=mapper, filename_filter=ff, rotation=False)
     dataset_batches = BatchGenerator(dataset, args.batch)
-    from mitosis import model_base
+    from src.mitosis import model_base
     TT.debug("Compile base model.")
     model = model_base(args.lr)
     model_saved_weights_path = os.path.join(args.path, 'base-model.weights.npy')
@@ -23,7 +23,7 @@ def task_train_filter(args):
         model.load_weights(model_saved_weights_path)
     train_start = time.time()
     log = LearnLog("filter", args.path)
-    for epoch in xrange(args.epoch):
+    for epoch in range(args.epoch):
         TT.debug(epoch + 1, "of", args.epoch, "epochs")
         log.on_dataset_epoch_begin(epoch + 1)
         for x, y in dataset_batches:
@@ -39,7 +39,7 @@ def task_train_cnn(args):
     dataset = Dataset(root_path=args.path, verbose=args.verbose, name='cnn',
                       mapper=mapper, filename_filter=ff, ratio=9)
     dataset_batches = BatchGenerator(dataset, args.batch)
-    from mitosis import model_base, model_1, model_2
+    from src.mitosis import model_base, model_1, model_2
     TT.debug("Compile base model.")
     model = model_base(lr=0)
     TT.debug("Compile model 1.")
@@ -61,7 +61,7 @@ def task_train_cnn(args):
     train_start = time.time()
     log1 = LearnLog("model1", args.path)
     log2 = LearnLog("model2", args.path)
-    for epoch in xrange(args.epoch):
+    for epoch in range(args.epoch):
         TT.debug(epoch + 1, "of", args.epoch, "epochs")
         log1.on_dataset_epoch_begin(epoch + 1)
         log2.on_dataset_epoch_begin(epoch + 1)
@@ -93,7 +93,7 @@ def task_train_cnn(args):
 def task_test_filter(args):
     dataset = ImageIterator(args.input, args.output)
     dataset_batches = BatchGenerator(dataset, args.batch)
-    from mitosis import model_base
+    from src.mitosis import model_base
     TT.debug("Compile base model.")
     model = model_base(args.lr)
     model_saved_weights_path = os.path.join(args.path, 'base-model.weights.npy')
@@ -114,7 +114,7 @@ def task_test_filter(args):
 def task_test_cnn(args):
     dataset = ImageIterator(args.input, args.output)
     dataset_batches = BatchGenerator(dataset, args.batch)
-    from mitosis import model_base, model_1, model_2
+    from src.mitosis import model_base, model_1, model_2
     TT.debug("Compile base model.")
     model = model_base(0)
     TT.debug("Compile model 1.")
@@ -137,7 +137,7 @@ def task_test_cnn(args):
         local1 = numpy.zeros(tmp.shape)
         local2 = numpy.zeros(tmp.shape)
         out = np_append(out, tmp)
-        x = 1. - x 
+        x = 1. - x
         x_new = []
         indices = []
         for i in range(len(tmp)):
@@ -168,10 +168,13 @@ def task_test_cnn(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Mitosis Detection Task Runner")
-    parser.add_argument("task", help="Run task. (train-filter, train-cnn, test-filter, test-cnn)",
-                        choices=['train-filter', 'test-cnn', 'train-cnn', 'test-filter'],
-                        metavar="task")
-    parser.add_argument("path", type=str, help="Directory containing mitosis images", metavar="path")
+    # parser.add_argument("task", help="Run task. (train-filter, train-cnn, test-filter, test-cnn)",
+    #                     choices=['train-filter', 'test-cnn', 'train-cnn', 'test-filter'],
+    #                     default='train-filter')
+    parser.add_argument("--task", default='train-cnn')
+    # parser.add_argument("path", type=str, help="Directory containing mitosis images",
+    #                     default="datasets/ICPR 2012/train/A01_v2")
+    parser.add_argument("--path", default="datasets/ICPR/")
     parser.add_argument("--epoch", type=int, help="Number of epochs. (Default: 10)", default=10)
     parser.add_argument("--batch", type=int, help="Size of batch fits in memory. (Default: 3000)", default=3000)
     parser.add_argument("--mini-batch", type=int, help="Size of training batch. (Default: 100)", default=100)
@@ -182,17 +185,23 @@ def parse_args():
                         dest='verbose')
     parser.add_argument("--dataset", type=str, help="Dataset type: icpr2012", default='icpr2012')
 
+
     return parser, parser.parse_args()
 
 
 def main():
     parser, args = parse_args()
+
     TT.verbose = args.verbose
     if args.task == 'train-filter':
-        TT.debug("Running: Task Train Filter")
+        print("Running: Task Train Filter")
+        # print("a7aaaa",args)
+
         task_train_filter(args)
     if args.task == 'train-cnn':
         TT.debug("Running: Task Train CNN")
+        print("Running: Task Train CNN")
+
         task_train_cnn(args)
     elif args.task == 'test-filter':
         TT.debug("Running: Task Test Filter")
@@ -201,6 +210,8 @@ def main():
         TT.debug("Running: Task Test CNN")
         task_test_cnn(args)
     else:
+        print("HELP ", args)
+
         parser.print_help()
         exit(0)
 

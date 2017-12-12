@@ -1,12 +1,13 @@
 # Fix Import
 import numpy
+import os
 
-from test import root_path
+# from test import root_path
 # Actual Imports
-from utilities import pixel_at_index, prepared_dataset_image, image_size, index_at_pixel, patch_centered_at, np2img
+from src.utilities import pixel_at_index, prepared_dataset_image, image_size, index_at_pixel, patch_centered_at, np2img
 
 
-root = root_path()
+root = os.getcwd()
 image = prepared_dataset_image(root+'/tests/patch_at/utilities.tiff')
 
 
